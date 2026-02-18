@@ -341,6 +341,148 @@ body {
   background: rgba(0,0,0,0.7);
   z-index: 998;
 }
+/* ── Leaderboard button ── */
+#lb-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  padding: 8px 12px;
+  background: #2a2a6e;
+  border: 3px solid #5555cc;
+  color: #aaf;
+  cursor: pointer;
+}
+#lb-btn:hover { background: #3a3a8e; }
+
+/* ── Leaderboard modal ── */
+#lb-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 1000;
+}
+#lb-modal {
+  display: none;
+  position: fixed;
+  top: 2vh;
+  left: 2vw;
+  right: 2vw;
+  bottom: 2vh;
+  background: #1a1a4e;
+  border: 6px solid #5555cc;
+  z-index: 1001;
+  max-width: 500px;
+  margin: 0 auto;
+  flex-direction: column;
+}
+.lb-header {
+  background: #2a2a6e;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 4px solid #5555cc;
+}
+.lb-header h2 { font-size: 12px; color: #aaf; }
+.lb-close {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+}
+.lb-close:hover { color: #fff; }
+.lb-body {
+  padding: 16px;
+  overflow-y: auto;
+  flex: 1;
+}
+.lb-name-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.lb-name-row label {
+  font-size: 8px;
+  color: #aaa;
+  white-space: nowrap;
+}
+.lb-name-row input {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  padding: 6px 8px;
+  background: #0f0e2e;
+  border: 3px solid #5555cc;
+  color: #fff;
+  flex: 1;
+  min-width: 0;
+}
+.lb-name-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 6px 10px;
+  background: #2a6e2a;
+  border: 3px solid #4a4;
+  color: #cfc;
+  cursor: pointer;
+}
+.lb-name-btn:hover { background: #3a8e3a; }
+.lb-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.lb-actions button {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 6px 10px;
+  border: 3px solid;
+  cursor: pointer;
+}
+.lb-btn-you {
+  background: #2a2a6e;
+  border-color: #5555cc;
+  color: #aaf;
+}
+.lb-btn-you:hover { background: #3a3a8e; }
+.lb-status {
+  font-size: 7px;
+  color: #666;
+  margin-bottom: 8px;
+}
+.lb-row {
+  display: flex;
+  padding: 6px 8px;
+  font-size: 8px;
+  border-bottom: 2px solid #2a2a5e;
+  align-items: center;
+}
+.lb-row-header {
+  color: #888;
+  font-size: 7px;
+  border-bottom: 3px solid #5555cc;
+}
+.lb-row.you {
+  background: #2a2a6e;
+  border: 2px solid #5555cc;
+}
+.lb-row.highlight { animation: lbFlash 1s ease; }
+@keyframes lbFlash {
+  0%, 100% { background: #2a2a6e; }
+  50% { background: #4a4aae; }
+}
+.lb-rank { width: 40px; color: #ffd700; }
+.lb-name-col { flex: 1; color: #e0e0e0; overflow: hidden; text-overflow: ellipsis; }
+.lb-score { width: 60px; text-align: right; color: #ff6666; }
+.lb-empty {
+  font-size: 8px;
+  color: #666;
+  text-align: center;
+  padding: 24px;
+}
 </style>
 </head>
 <body>
@@ -350,12 +492,13 @@ body {
     <h1>KRÓNU SMELLIR</h1>
     <div id="stats-display"></div>
   </div>
-  <div style="text-align:right;display:flex;align-items:center;gap:16px">
+  <div style="text-align:right;display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
     <div id="balance-display" style="font-size:16px;color:#fff">0 kr</div>
     <div id="rebirth-display" style="display:flex;align-items:center;gap:6px;font-size:12px;color:#ff6666">
       <div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ff8888,#ff4444 50%,#aa2222);border:2px solid #cc3333;box-shadow:0 0 6px rgba(255,68,68,0.5);display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-family:'Press Start 2P',monospace" id="rebirth-icon">R</div>
       <span id="rebirth-count"></span>
     </div>
+    <button id="lb-btn" onclick="openLB()">STIGATAFLA</button>
   </div>
 </div>
 
@@ -399,7 +542,130 @@ body {
   <button onclick="closeOffline()">Takk!</button>
 </div>
 
+<div id="lb-overlay" onclick="closeLB()"></div>
+<div id="lb-modal">
+  <div class="lb-header">
+    <h2>STIGATAFLA</h2>
+    <button class="lb-close" onclick="closeLB()">X</button>
+  </div>
+  <div class="lb-body">
+    <div class="lb-name-row">
+      <label>Nafn:</label>
+      <input type="text" id="lb-name-input" maxlength="20" placeholder="Nafnið þitt...">
+      <button class="lb-name-btn" onclick="saveLBName()">VISTA</button>
+    </div>
+    <div class="lb-actions">
+      <button class="lb-btn-you" onclick="findMe()">ÞÚ</button>
+    </div>
+    <div class="lb-status" id="lb-status"></div>
+    <div id="lb-table"></div>
+  </div>
+</div>
+
 <script>
+// ── Leaderboard API ──
+const LB_URL = 'https://jsonblob.com/api/jsonBlob/019c72e9-9d97-7cbd-ac67-48218fb11665';
+
+// ── Player ID & Name ──
+function getPlayerId() {
+  let id = localStorage.getItem('kronuSmellir_playerId');
+  if (!id) {
+    id = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('kronuSmellir_playerId', id);
+  }
+  return id;
+}
+function getPlayerName() { return localStorage.getItem('kronuSmellir_playerName') || ''; }
+function setPlayerName(name) { localStorage.setItem('kronuSmellir_playerName', name); }
+
+const lbMyId = getPlayerId();
+let lbData = [];
+
+// ── Leaderboard Functions ──
+async function submitScore() {
+  const name = getPlayerName();
+  if (!name) return;
+  try {
+    const res = await fetch(LB_URL, { headers: { 'Accept': 'application/json' } });
+    const data = await res.json();
+    data[lbMyId] = { name: name, rebirthKr: state.rebirthKr, lastUpdated: Date.now() };
+    await fetch(LB_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  } catch(e) { console.warn('Score submit failed:', e); }
+}
+
+async function fetchLeaderboard() {
+  document.getElementById('lb-status').textContent = 'Sækir...';
+  try {
+    const res = await fetch(LB_URL, { headers: { 'Accept': 'application/json' } });
+    const data = await res.json();
+    lbData = Object.entries(data).map(([id, entry]) => ({ id, ...entry }));
+    lbData.sort((a, b) => b.rebirthKr - a.rebirthKr);
+    renderLeaderboard();
+    document.getElementById('lb-status').textContent =
+      'Uppfært: ' + new Date().toLocaleTimeString('is-IS');
+  } catch(e) {
+    document.getElementById('lb-status').textContent = 'Villa við að sækja stigatöflu';
+  }
+}
+
+function renderLeaderboard() {
+  const table = document.getElementById('lb-table');
+  if (lbData.length === 0) {
+    table.innerHTML = '<div class="lb-empty">Engin á stigatöflu enn</div>';
+    return;
+  }
+  let html = '<div class="lb-row lb-row-header"><span class="lb-rank">#</span><span class="lb-name-col">NAFN</span><span class="lb-score">ENDURF.</span></div>';
+  lbData.forEach((entry, i) => {
+    const isYou = entry.id === lbMyId;
+    html += '<div class="lb-row' + (isYou ? ' you' : '') + '" id="lb-entry-' + entry.id + '">' +
+      '<span class="lb-rank">' + (i + 1) + '.</span>' +
+      '<span class="lb-name-col">' + escapeHtml(entry.name) + (isYou ? ' ←' : '') + '</span>' +
+      '<span class="lb-score">' + entry.rebirthKr + '</span>' +
+    '</div>';
+  });
+  table.innerHTML = html;
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+function openLB() {
+  document.getElementById('lb-overlay').style.display = 'block';
+  document.getElementById('lb-modal').style.display = 'flex';
+  document.getElementById('lb-name-input').value = getPlayerName();
+  fetchLeaderboard();
+}
+
+function closeLB() {
+  document.getElementById('lb-overlay').style.display = 'none';
+  document.getElementById('lb-modal').style.display = 'none';
+}
+
+function saveLBName() {
+  const input = document.getElementById('lb-name-input');
+  const name = input.value.trim().slice(0, 20);
+  if (!name) return;
+  setPlayerName(name);
+  submitScore().then(() => fetchLeaderboard());
+}
+
+function findMe() {
+  const el = document.getElementById('lb-entry-' + lbMyId);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.remove('highlight');
+    void el.offsetWidth;
+    el.classList.add('highlight');
+  }
+}
+
 // ── Game State ──
 const COIN_LEVELS = [
   { name: '1 kr',     value: 1,      cost: 0 },
@@ -646,6 +912,7 @@ function doRebirth() {
   state.coinLevel = 0;
   GENERATORS.forEach(g => { state.generators[g.id] = 0; });
   saveGame();
+  submitScore();
   updateUI();
 }
 
@@ -735,6 +1002,15 @@ function init() {
 
   // Save on close
   window.addEventListener('beforeunload', saveGame);
+
+  // Leaderboard: submit score on load and auto-refresh every 5 minutes
+  submitScore();
+  setInterval(() => {
+    submitScore();
+    if (document.getElementById('lb-modal').style.display === 'flex') {
+      fetchLeaderboard();
+    }
+  }, 5 * 60 * 1000);
 }
 
 init();
